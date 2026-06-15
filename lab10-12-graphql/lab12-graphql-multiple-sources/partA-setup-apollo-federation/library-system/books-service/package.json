@@ -1,0 +1,10 @@
+{
+  "name": "books-service",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "dependencies": {
+    "apollo-server": "^3.12.0",
+    "graphql": "^15.8.0",
+    "@apollo/federation": "^0.38.1"
+  }
+}

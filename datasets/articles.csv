@@ -1,0 +1,11 @@
+id,title,content,category
+1,"Introduction to AI","Artificial Intelligence is transforming industries...","Technology"
+2,"Climate Change Effects","Global warming impacts are becoming more severe...","Science"
+3,"MongoDB Tutorial","Learn how to use MongoDB for modern applications...","Database"
+4,"Healthy Eating Habits","Nutrition plays a crucial role in overall health...","Health"
+5,"GraphQL vs REST","Comparison between GraphQL and REST APIs...","API"
+6,"Renewable Energy","Solar and wind power are sustainable alternatives...","Science"
+7,"Python Programming","Python is versatile for data science and web...","Programming"
+8,"Mental Health Awareness","Understanding mental health is important...","Health"
+9,"Blockchain Technology","Blockchain enables secure decentralized systems...","Technology"
+10,"SQL Optimization","Techniques to optimize SQL query performance...","Database"

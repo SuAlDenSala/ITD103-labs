@@ -1,0 +1,13 @@
+{
+  "name": "lab11-advanced-graphql",
+  "version": "1.0.0",
+  "description": "Advanced GraphQL Server for Lab 11",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "apollo-server": "^3.13.0",
+    "graphql": "^16.8.1"
+  }
+}

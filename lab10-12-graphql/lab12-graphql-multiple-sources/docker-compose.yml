@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  books-service:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - ./books-service:/app:Z
+    command: node index.js
+    ports:
+      - "4001:4001"
+
+  users-service:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - ./users-service:/app:Z
+    command: node index.js
+    ports:
+      - "4002:4002"
+
+  gateway:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - ./gateway:/app:Z
+    command: node index.js
+    ports:
+      - "4000:4000"
+    depends_on:
+      - books-service
+      - users-service
