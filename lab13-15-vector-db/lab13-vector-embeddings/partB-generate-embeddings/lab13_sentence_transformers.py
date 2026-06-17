@@ -1,9 +1,13 @@
 from sentence_transformers import SentenceTransformer, util
 import pandas as pd
 import numpy as np
+import os
+
+base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+datasets_dir = os.path.join(base_dir, 'datasets')
 
 # Load dataset
-df = pd.read_csv('datasets/articles.csv')
+df = pd.read_csv(os.path.join(datasets_dir, 'articles.csv'))
 print(f"Loaded {len(df)} articles")
 
 # Initialize model
@@ -14,7 +18,7 @@ sentences = df['content'].tolist()
 embeddings = model.encode(sentences, show_progress_bar=True)
 
 # Save embeddings
-np.save('datasets/article_embeddings.npy', embeddings)
+np.save(os.path.join(datasets_dir, 'article_embeddings.npy'), embeddings)
 print(f"Generated embeddings shape: {embeddings.shape}")
 
 # Test similarity

@@ -1,16 +1,19 @@
-import pinecone
+from pinecone import Pinecone, ServerlessSpec
 import pandas as pd
 import numpy as np
 from sentence_transformers import SentenceTransformer
 import os
 from tqdm import tqdm
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv())
 
 # Initialize Pinecone
 pinecone_api_key = os.getenv('PINECONE_API_KEY')
-pinecone.init(api_key=pinecone_api_key, environment='gcp-starter')
+pc = Pinecone(api_key=pinecone_api_key)
 
 # List existing indexes
-existing_indexes = pinecone.list_indexes()
+existing_indexes = pc.list_indexes().names()
 print(f"Existing indexes: {existing_indexes}")
 
 # Create index (if doesn't exist)
@@ -18,20 +21,21 @@ index_name = "itd103-articles"
 dimension = 384  # all-MiniLM-L6-v2 dimension
 
 if index_name not in existing_indexes:
-    pinecone.create_index(
+    pc.create_index(
         name=index_name,
         dimension=dimension,
         metric="cosine",
-        pods=1,
-        replicas=1,
-        pod_type="starter"
+        spec=ServerlessSpec(
+            cloud="aws",
+            region="us-east-1"
+        )
     )
     print(f"Created index: {index_name}")
 else:
     print(f"Index {index_name} already exists")
 
 # Connect to index
-index = pinecone.Index(index_name)
+index = pc.Index(index_name)
 print(f"Index stats: {index.describe_index_stats()}")
 
 # Load and prepare data

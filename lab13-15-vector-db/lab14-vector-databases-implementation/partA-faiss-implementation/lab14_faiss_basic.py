@@ -21,7 +21,7 @@ index_flat.add(embeddings)
 print(f"Flat index: {index_flat.ntotal} vectors")
 
 # Option 2: IVF index (approximate search, faster)
-nlist = 50  # Number of clusters
+nlist = 5  # Number of clusters
 quantizer = faiss.IndexFlatL2(dimension)
 index_ivf = faiss.IndexIVFFlat(quantizer, dimension, nlist, faiss.METRIC_L2)
 

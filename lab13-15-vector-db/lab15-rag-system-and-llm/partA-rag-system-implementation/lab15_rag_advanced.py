@@ -2,7 +2,7 @@ import os
 import re
 from typing import List, Dict, Tuple
 import tiktoken
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # Import RAGSystem and RAGConfig from lab15_rag_basic
 from lab15_rag_basic import RAGSystem, RAGConfig
@@ -93,7 +93,7 @@ class AdvancedRAGSystem(RAGSystem):
         context = "Relevant information from documents:\n\n"
         for i, chunk in enumerate(selected_chunks, 1):
             context += f"[Chunk {i} - Relevance: {chunk['combined_score']:.3f}]\n"
-            context += f"Source: {chunk['title']}\n"
+            context += f"Source: {chunk['metadata']['title']}\n"
             context += f"Content: {chunk['content']}\n\n"
         
         return context, len(selected_chunks), total_tokens
@@ -117,6 +117,8 @@ class AdvancedRAGSystem(RAGSystem):
                     'id': doc['id']
                 }
             )
+            for chunk in chunks:
+                chunk['score'] = doc.get('score', 0.0)
             processed_docs.extend(chunks)
         
         print(f"   Retrieved {len(documents)} documents, split into {len(processed_docs)} chunks")

@@ -63,9 +63,11 @@ class QueryOptimizer:
     def analyze_query_plan(self):
         print("\n=== Unoptimized Query Plan Analysis ===")
         # Unoptimized query
-        explanation = self.db.orders.find(
-            {"status": "completed", "payment_method": "credit"}
-        ).explain("executionStats")
+        explanation = self.db.command(
+            "explain", 
+            {"find": "orders", "filter": {"status": "completed", "payment_method": "credit"}}, 
+            verbosity="executionStats"
+        )
         
         stats = explanation["executionStats"]
         print(f"Total Docs Examined: {stats['totalDocsExamined']}")
@@ -76,9 +78,11 @@ class QueryOptimizer:
         # Create index
         self.db.orders.create_index([("status", pymongo.ASCENDING), ("payment_method", pymongo.ASCENDING)])
         
-        explanation = self.db.orders.find(
-            {"status": "completed", "payment_method": "credit"}
-        ).explain("executionStats")
+        explanation = self.db.command(
+            "explain", 
+            {"find": "orders", "filter": {"status": "completed", "payment_method": "credit"}}, 
+            verbosity="executionStats"
+        )
         
         stats = explanation["executionStats"]
         print(f"Total Docs Examined: {stats['totalDocsExamined']}")

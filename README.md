@@ -56,6 +56,11 @@ This repository contains the scaffolded implementation for Labs 1 through 16.
     - `partD-performance-optimization/`
 
 - **`lab13-15-vector-db/`**
+  - `lab13-vector-embeddings/`
+    - `partA-embeddings/`
+    - `partA-environment-setup/`
+    - `partB-cosine-similarity/`
+    - `partB-generate-embeddings/`
   - `lab14-vector-databases-implementation/`
     - `partA-faiss-implementation/`
     - `partB-pinecone-cloud-vector-database/`

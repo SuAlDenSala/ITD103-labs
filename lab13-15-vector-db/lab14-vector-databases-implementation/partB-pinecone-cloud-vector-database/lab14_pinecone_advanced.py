@@ -1,13 +1,17 @@
-import pinecone
+from pinecone import Pinecone
 import pandas as pd
 import numpy as np
 from sentence_transformers import SentenceTransformer
 import os
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv())
 
 # Initialize
-pinecone.init(api_key=os.getenv('PINECONE_API_KEY'), environment='gcp-starter')
-index = pinecone.Index("itd103-articles")
+pc = Pinecone(api_key=os.getenv('PINECONE_API_KEY'))
+index = pc.Index("itd103-articles")
 model = SentenceTransformer('all-MiniLM-L6-v2')
+df = pd.read_csv('../../datasets/articles.csv')
 
 # 1. Filtered Search
 def filtered_search(query, category_filter=None, min_score=0.5):

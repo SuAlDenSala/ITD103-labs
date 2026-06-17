@@ -1,11 +1,14 @@
-import pinecone
-import openai
+from pinecone import Pinecone
+from openai import OpenAI
 import pandas as pd
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from typing import List, Dict
 import os
 from dataclasses import dataclass
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv())
 
 @dataclass
 class RAGConfig:
@@ -23,14 +26,11 @@ class RAGSystem:
         self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
         
         # Initialize Pinecone
-        pinecone.init(
-            api_key=os.getenv('PINECONE_API_KEY'),
-            environment='gcp-starter'
-        )
-        self.index = pinecone.Index("itd103-articles")
+        self.pc = Pinecone(api_key=os.getenv('PINECONE_API_KEY'))
+        self.index = self.pc.Index("itd103-articles")
         
         # Initialize OpenAI
-        openai.api_key = os.getenv('OPENAI_API_KEY')
+        self.client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
     
     def retrieve(self, query: str) -> List[Dict]:
         """Retrieve relevant documents"""
@@ -80,17 +80,38 @@ Question: {query}
 
 Answer: """
         
-        response = openai.ChatCompletion.create(
-            model=self.config.model,
-            messages=[
-                {"role": "system", "content": "You are a knowledgeable assistant."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=self.config.temperature,
-            max_tokens=self.config.max_tokens
-        )
-        
-        return response.choices[0].message.content
+        try:
+            response = self.client.chat.completions.create(
+                model=self.config.model,
+                messages=[
+                    {"role": "system", "content": "You are a knowledgeable assistant."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=self.config.temperature,
+                max_tokens=self.config.max_tokens
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            if "insufficient_quota" in str(e) or "RateLimitError" in str(e) or "429" in str(e):
+                print(f"\n[!] OpenAI quota exceeded. Falling back to a FREE local model (Flan-T5)...")
+                try:
+                    from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+                    # Initialize the local free model only once
+                    if not hasattr(self, 'local_model'):
+                        print("[!] Downloading/Loading free local model (this takes a moment the first time)...")
+                        self.local_tokenizer = AutoTokenizer.from_pretrained("google/flan-t5-small")
+                        self.local_model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-small")
+                    
+                    # Flan-T5 expects a simpler prompt format
+                    local_prompt = f"Context: {context}\n\nQuestion: {query}\n\nAnswer:"
+                    inputs = self.local_tokenizer(local_prompt, return_tensors="pt")
+                    outputs = self.local_model.generate(**inputs, max_length=150)
+                    res = self.local_tokenizer.decode(outputs[0], skip_special_tokens=True)
+                    return "[Local Free Model Fallback] " + res
+                except Exception as local_e:
+                    return f"Error using local fallback: {local_e}"
+            else:
+                return f"OpenAI Error: {e}"
     
     def answer(self, query: str) -> Dict:
         """Complete RAG pipeline"""

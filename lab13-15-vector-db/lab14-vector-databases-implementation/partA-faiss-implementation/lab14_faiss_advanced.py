@@ -20,10 +20,10 @@ index_hnsw.add(embeddings)
 faiss.write_index(index_hnsw, "../../datasets/faiss_hnsw.index")
 
 # 2. Product Quantization Index (for memory efficiency)
-nlist = 50
+nlist = 5
 m = 8  # Number of subquantizers (must divide dimension)
 quantizer = faiss.IndexFlatL2(dimension)
-index_pq = faiss.IndexIVFPQ(quantizer, dimension, nlist, m, 8)  # 8 bits per quantizer
+index_pq = faiss.IndexIVFPQ(quantizer, dimension, nlist, m, 3)  # 3 bits per quantizer
 index_pq.train(embeddings)
 index_pq.add(embeddings)
 faiss.write_index(index_pq, "../../datasets/faiss_pq.index")

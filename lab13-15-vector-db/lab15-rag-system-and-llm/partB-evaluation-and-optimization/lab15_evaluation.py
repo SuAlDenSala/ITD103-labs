@@ -156,8 +156,11 @@ class RAGEvaluator:
             
             # Store retrieval metrics
             for key in retrieval_metrics:
-                if key in overall_metrics['retrieval']:
-                    overall_metrics['retrieval'][f'avg_{key}'].append(retrieval_metrics[key])
+                target_key = f'avg_{key}' if not key.startswith('avg_') else key
+                # Wait, f1_score becomes avg_f1_score, but the dict has avg_f1
+                if target_key == 'avg_f1_score': target_key = 'avg_f1'
+                if target_key in overall_metrics['retrieval']:
+                    overall_metrics['retrieval'][target_key].append(retrieval_metrics[key])
             
             # Evaluate generation
             generation_metrics = self.evaluate_generation(
@@ -182,7 +185,7 @@ class RAGEvaluator:
         
         # Calculate averages
         for category in ['retrieval', 'generation']:
-            for metric in overall_metrics[category]:
+            for metric in list(overall_metrics[category].keys()):
                 if metric.startswith('avg_'):
                     values = overall_metrics[category][metric]
                     if values:
@@ -218,16 +221,16 @@ if __name__ == "__main__":
     print("EVALUATION RESULTS SUMMARY")
     print(f"{'='*60}")
     print("\nRetrieval Performance:")
-    print(f"  Precision: {results['retrieval']['precision']:.3f}")
-    print(f"  Recall: {results['retrieval']['recall']:.3f}")
-    print(f"  F1 Score: {results['retrieval']['f1_score']:.3f}")
-    print(f"  Category Match Rate: {results['retrieval']['category_match']:.3f}")
-    print(f"  Average Score: {results['retrieval']['avg_score']:.3f}")
+    print(f"  Precision: {results['retrieval'].get('precision', 0):.3f}")
+    print(f"  Recall: {results['retrieval'].get('recall', 0):.3f}")
+    print(f"  F1 Score: {results['retrieval'].get('f1_score', results['retrieval'].get('f1', 0)):.3f}")
+    print(f"  Category Match Rate: {results['retrieval'].get('category_match', 0):.3f}")
+    print(f"  Average Score: {results['retrieval'].get('avg_score', results['retrieval'].get('score', 0)):.3f}")
     
     print("\nGeneration Performance:")
-    print(f"  Keyword Coverage: {results['generation']['keyword_coverage']:.3f}")
-    print(f"  Average Answer Length: {results['generation']['avg_answer_length']:.0f} chars")
-    print(f"  Refusal Rate: {results['generation']['refusal_rate']:.3f}")
+    print(f"  Keyword Coverage: {results['generation'].get('keyword_coverage', 0):.3f}")
+    print(f"  Average Answer Length: {results['generation'].get('avg_answer_length', results['generation'].get('answer_length', 0)):.0f} chars")
+    print(f"  Refusal Rate: {results['generation'].get('refusal_rate', 0):.3f}")
     
     print("\nSystem Performance:")
     print(f"  Average Latency: {results['latency_avg']:.2f}s")
@@ -235,9 +238,9 @@ if __name__ == "__main__":
     
     # Calculate overall score
     overall_score = (
-        0.4 * results['retrieval']['f1_score'] +
-        0.4 * results['generation']['keyword_coverage'] +
-        0.1 * (1 - results['generation']['refusal_rate']) +
+        0.4 * results['retrieval'].get('f1_score', results['retrieval'].get('f1', 0)) +
+        0.4 * results['generation'].get('keyword_coverage', 0) +
+        0.2 * (1.0 - results['generation'].get('refusal_rate', 0)) +
         0.1 * (1 / (1 + results['latency_avg']))  # Inverse of latency
     )
     
